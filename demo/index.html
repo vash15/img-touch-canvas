@@ -51,14 +51,16 @@
     <script>
         var gesturableImg = new ImgTouchCanvas({
             canvas: document.getElementById('mycanvas'),
-            path: "CM_BD_3D_Pack.jpg", // "https://public.dm2302.livefilestore.com/y3pTiD2fb9CL3rhz9Y6D6T3w5gWRLCr5uxot89n_Bf4cVloetZtw77ZqhKlhfPcXXOCea6zD8ZKeKkBHcAAjr3Pnn8QTLlEaKSiKNOpW_1lrSE/CM_BD_3D_Pack.jpg?psid=1&rdrts=113827827", // "trollface.png",
+            path: "TIMG903-01.jpg", // "TIMG903-01.jpg" "UNCLE.jpg" "CM_BD_3D_Pack.jpg" "https://public.dm2302.livefilestore.com/y3pTiD2fb9CL3rhz9Y6D6T3w5gWRLCr5uxot89n_Bf4cVloetZtw77ZqhKlhfPcXXOCea6zD8ZKeKkBHcAAjr3Pnn8QTLlEaKSiKNOpW_1lrSE/CM_BD_3D_Pack.jpg?psid=1&rdrts=113827827", // "trollface.png",
             momentum: true,
-			zoomEnd: function (zoom) {
+			onZoomEnd: function (zoom, zoomed) {
+				console.log("---> is zoomed: %s", zoomed);
 				console.log("---> zoom end at %s", zoom);
+			},
+			onZoom: function (zoom) {
+				console.log("---> zoom is %s", zoom);
 			}
         });
-
-		window.g = gesturableImg;
     </script>
 </body>
 </html>

@@ -30,13 +30,20 @@ This code may be freely distributed under the MIT License
             throw 'ImgZoom constructor: missing arguments canvas or path';
         }
 
-		this.momentum       = options.momentum;
-        this.canvas         = options.canvas;
-        this.canvas.width   = this.canvas.clientWidth;
-        this.canvas.height  = this.canvas.clientHeight;
-        this.context        = this.canvas.getContext('2d');
-		this.zoomMax        = options.zoomMax || 2;
-		this.zoomEnd		= options.zoomEnd; // Callback of zoom end
+		var clientWidth  = options.canvas.clientWidth;
+		var clientHeight = options.canvas.clientHeight;
+
+		this.momentum             = options.momentum;
+        this.canvas               = options.canvas;
+        this.canvas.width         = clientWidth*2;
+        this.canvas.height        = clientHeight*2;
+		this.canvas.style.width   = clientWidth+'px';
+		this.canvas.style.height  = clientHeight+'px';
+        this.context              = this.canvas.getContext('2d');
+		this.maxZoom              = (options.maxZoom || 2)*2;
+		this.onZoomEnd            = options.onZoomEnd; // Callback of zoom end
+		this.onZoom               = options.onZoom; // Callback on zoom
+		this.initResizeProperty   = null;
 
         this.position = {
             x: 0,
@@ -50,24 +57,24 @@ This code may be freely distributed under the MIT License
             x: 0.5,
             y: 0.5
         };
+		this.initPosition = {
+            x: 0,
+            y: 0
+        };
 
         this.lastZoomScale = null;
-        this.lastX = null;
-        this.lastY = null;
+        this.lastX         = null;
+        this.lastY         = null;
+		this.startZoom     = false;
+        this.init          = false;
+		this.running       = true;
 
-        this.mdown = false; //desktop drag
-
-		this.startZoom = false;
-        this.init  = false;
-		this.running = true;
-        this.checkRequestAnimationFrame();
-
+		this.checkRequestAnimationFrame();
 
 		this.imgTexture = new Image();
 		this.imgTexture.onload = function(){
 			requestAnimationFrame(this.animate.bind(this));
 	        this.setEventListeners();
-			this.createImpetus();
 		}.bind(this);
         this.imgTexture.src = options.path;
 
@@ -83,22 +90,32 @@ This code may be freely distributed under the MIT License
             if( !this.init ) {
 				if ( this.imgTexture.width ) {
 
-					var cover         = this.imgTexture.width < this.imgTexture.height;
-					var viewportRatio = this.canvas.clientWidth / this.canvas.clientHeight;
+					var viewportRatio = this.canvas.width / this.canvas.height;
 					var imageRatio    = this.imgTexture.width / this.imgTexture.height;
 				    var scaleRatio    = null;
 
-					if ((cover === true && imageRatio >= viewportRatio) || (cover === false && imageRatio <= viewportRatio)) {
-						scaleRatio = this.canvas.clientWidth / this.imgTexture.width;
-					}else if ((cover === true && imageRatio < viewportRatio) || (cover === false && imageRatio > viewportRatio)) {
-						scaleRatio = this.canvas.clientHeight / this.imgTexture.height;
+					if (imageRatio >= viewportRatio) {
+						this.initResizeProperty = 'width';
+						scaleRatio = this.canvas.width / this.imgTexture.width;
+						this.position.x = 0;
+						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
+
+					}else if (imageRatio < viewportRatio) {
+						this.initResizeProperty = 'height';
+						scaleRatio = this.canvas.height / this.imgTexture.height;
+						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
+						this.position.y = 0;
 					}
 
                     this.scale.x = scaleRatio;
                     this.scale.y = scaleRatio;
-					this.initScale.x = scaleRatio;
-                    this.initScale.y = scaleRatio;
-                    this.init    = true;
+
+					this.initPosition = {
+						x: this.position.x,
+						y: this.position.y
+					};
+					this.initialScale = scaleRatio;
+                    this.init         = true;
 
                 }
             }
@@ -140,7 +157,6 @@ This code may be freely distributed under the MIT License
 
                 this.lastZoomScale = zoomScale;
             }
-
             return zoom;
         },
 
@@ -150,9 +166,21 @@ This code may be freely distributed under the MIT License
             //new scale
             var currentScale = this.scale.x;
             var newScale = this.scale.x + zoom/100;
+            if( newScale < this.initialScale ) {
+					this.scaled = false;
+					this.position.x = this.initPosition.x;
+					this.position.y = this.initPosition.y;
+					this.scale.x = this.initialScale;
+					this.scale.y = this.initialScale;
+					return;
+			};
+            if (this.maxZoom && newScale > this.maxZoom){
+                // could just return but then won't stop exactly at maxZoom
+                newScale = this.maxZoom;
+            }
 
 
-            //some helpers
+			//some helpers
             var deltaScale    = newScale - currentScale;
             var currentWidth  = (this.imgTexture.width * this.scale.x);
             var currentHeight = (this.imgTexture.height * this.scale.y);
@@ -163,8 +191,8 @@ This code may be freely distributed under the MIT License
             //by default scale doesnt change position and only add/remove pixel to right and bottom
             //so we must move the image to the left to keep the image centered
             //ex: coefX and coefY = 0.5 when image is centered <=> move image to the left 0.5x pixels added to the right
-            var canvasmiddleX = this.canvas.clientWidth / 2;
-            var canvasmiddleY = this.canvas.clientHeight / 2;
+            var canvasmiddleX = this.canvas.width / 2;
+            var canvasmiddleY = this.canvas.height / 2;
             var xonmap = (-this.position.x) + canvasmiddleX;
             var yonmap = (-this.position.y) + canvasmiddleY;
             var coefX = -xonmap / (currentWidth);
@@ -172,36 +200,18 @@ This code may be freely distributed under the MIT License
             var newPosX = this.position.x + deltaWidth*coefX;
             var newPosY = this.position.y + deltaHeight*coefY;
 
-            //edges cases
-            var newWidth = currentWidth + deltaWidth;
-            var newHeight = currentHeight + deltaHeight;
-
-
-            if( newWidth < this.canvas.clientWidth ||  newHeight < this.canvas.clientHeight ) {
-				this.scaled = false;
-				this.position.x = 0;
-				this.position.y = 0;
-				this.scale.x = this.initScale.x;
-				this.scale.y = this.initScale.y;
-				return;
-			}
-
-            if( newPosX > 0 ) { newPosX = 0; }
-            if( newPosX + newWidth < this.canvas.clientWidth ) { newPosX = this.canvas.clientWidth - newWidth;}
-
-
-            if( newPosY > 0 ) { newPosY = 0; }
-            if( newPosY + newHeight < this.canvas.clientHeight ) { newPosY = this.canvas.clientHeight - newHeight; }
-
-			if ( newScale <= 2 ){
-				//finally affectations
-				this.scale.x    = newScale;
-				this.scale.y    = newScale;
-				this.position.x = newPosX;
-				this.position.y = newPosY;
-			}
+            //finally affectations
+            this.scale.x    = newScale;
+            this.scale.y    = newScale;
+            this.position.x = newPosX;
+            this.position.y = newPosY;
 
 			this.scaled = true;
+
+			// zoom scale callback
+            if (this.onZoom){
+                this.onZoom(newScale, this.scaled);
+            }
         },
 
 		doMove: function(relativeX, relativeY) {
@@ -212,23 +222,53 @@ This code may be freely distributed under the MIT License
 				var currentWidth = (this.imgTexture.width * this.scale.x);
 				var currentHeight = (this.imgTexture.height * this.scale.y);
 
+				var clientWidth = this.canvas.width, clientHeight = this.canvas.height;
+
 				this.position.x += deltaX;
 				this.position.y += deltaY;
 
+
 				//edge cases
-				if( this.position.x > 0 ) {
-					this.position.x = 0;
-				}else if( this.position.x + currentWidth < this.canvas.clientWidth ) {
-					this.position.x = this.canvas.clientWidth - currentWidth;
-				}if( this.position.y > 0 ) {
-					this.position.y = 0;
-				}else if( this.position.y + currentHeight < this.canvas.clientHeight ) {
-					this.position.y = this.canvas.clientHeight - currentHeight;
+				if (currentWidth >= clientWidth){
+					if( this.position.x > 0 ) {
+						// cannot move left edge of image > container left edge
+						this.position.x = 0;
+					} else if( this.position.x + currentWidth < clientWidth ) {
+						// cannot move right edge of image < container right edge
+						this.position.x = clientWidth - currentWidth;
+					}
+				} else {
+					if( this.position.x < currentWidth - clientWidth ) {
+						// cannot move left edge of image < container left edge
+						this.position.x = currentWidth - clientWidth;
+					}else if( this.position.x > clientWidth - currentWidth ) {
+						// cannot move right edge of image > container right edge
+						this.position.x = clientWidth - currentWidth;
+					}
+				}
+				if (currentHeight > clientHeight){
+					if( this.position.y > 0 ) {
+						// cannot move top edge of image < container top edge
+						this.position.y = 0;
+					}else if( this.position.y + currentHeight < clientHeight ) {
+						// cannot move bottom edge of image > container bottom edge
+						this.position.y = clientHeight - currentHeight;
+					}
+				}else {
+					if( this.position.y < 0 ) {
+						// cannot move top edge of image < container top edge
+						this.position.y = 0;
+					}else if( this.position.y > clientHeight - currentHeight ) {
+						// cannot move bottom edge of image > container bottom edge
+						this.position.y = clientHeight - currentHeight;
+					}
 				}
 
 			}else if ( this.momentum &&  this.lastX && this.lastY ) {
+
 				this.position.x = relativeX;
 				this.position.y = relativeY;
+
 			}
 
 			this.lastX = relativeX;
@@ -245,13 +285,15 @@ This code may be freely distributed under the MIT License
             }.bind(this);
 
 			this.eventTouchMove = function(e) {
-                e.preventDefault();
+				if ( this.scaled )
+					e.preventDefault();
 
-                if(e.targetTouches.length == 2) { //pinch
+				if(e.targetTouches.length == 2) { //pinch
+
 					this.startZoom = true;
 					if ( this.momentum  )
 						this.destroyImpetus();
-                    this.doZoom(this.gesturePinchZoom(e));
+					this.doZoom(this.gesturePinchZoom(e));
                 }
                 else if(e.targetTouches.length == 1) {
 					if ( !this.momentum  ){
@@ -264,7 +306,6 @@ This code may be freely distributed under the MIT License
             }.bind(this);
 
 			this.eventTouchEnd = function(e) {
-
 				if ( this.momentum ){
 					e.preventDefault();
 					if ( this.startZoom && this.scaled ){
@@ -274,8 +315,8 @@ This code may be freely distributed under the MIT License
 					}
 				}
 
-				if ( this.startZoom && typeof this.zoomEnd === 'function' )
-					this.zoomEnd( Math.round(this.scale.x*100)/100 );
+				if ( this.startZoom && typeof this.onZoomEnd === 'function' )
+					this.onZoomEnd( Math.round(this.scale.x*100)/100, this.scaled );
 
 				this.startZoom = false;
 
@@ -339,12 +380,34 @@ This code may be freely distributed under the MIT License
 		createImpetus: function () {
 			if ( typeof Impetus === 'undefined' || !this.momentum || this.impetus) return;
 
+			var boundX, boundY;
+
+			if (this.initResizeProperty == 'width') {
+				boundX = [-this.imgTexture.width * this.scale.x + this.canvas.width, 0];
+				if (this.imgTexture.height * this.scale.y > this.canvas.height) {
+					boundY = [-this.imgTexture.height * this.scale.y + this.canvas.height, 0];
+				}
+				else {
+					boundY = [this.position.y - 1, this.position.y + 1];
+				}
+			}
+			else {
+				if (this.imgTexture.width * this.scale.x > this.canvas.width) {
+					boundX = [-this.imgTexture.width * this.scale.x + this.canvas.width, 0];
+				}
+				else {
+					boundX = [this.position.x - 1, this.position.x + 1];
+				}
+				boundY = [-this.imgTexture.height*this.scale.y+this.canvas.height, 0]
+			}
+
 			this.impetus = new Impetus({
 				source: this.canvas,
-				boundX: [-this.imgTexture.width*this.scale.x+this.canvas.width, 0],
-				boundY: [-this.imgTexture.height*this.scale.y+this.canvas.height, 0],
+				boundX: boundX,
+				boundY: boundY,
 				initialValues: [this.position.x, this.position.y],
 				friction: 0.96,
+				multiplier: 2,
 				update: function(x, y) {
 					this.doMove(x, y);
 				}.bind(this)
