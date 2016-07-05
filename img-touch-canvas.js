@@ -83,7 +83,7 @@ This code may be freely distributed under the MIT License
     ImgTouchCanvas.prototype = {
 
         animate: function() {
-			if ( !this.running )
+			if ( this.init && !this.running )
 				return this;
 
             //set scale such as image cover all the canvas
