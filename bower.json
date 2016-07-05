@@ -21,5 +21,8 @@
     "test",
     "tests",
 	"demo"
-  ]
+  ],
+  "dependencies": {
+	  "impetus": "https://github.com/SonoIo/impetus.git#master"
+  }
 }
