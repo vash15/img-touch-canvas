@@ -10,10 +10,12 @@ Tested in Android Browser, Android Google Chrome, iOS Safari
 
 - `canvas` mandatory. It is a DOM element where the image is rendered.
 - `path` mandatory. It is a path url of image.
+- `doubletap` optional (default `true`). Double tap for zooming.
 - `momentum` optional (defalut `false`). Set a momentum when the image is dragged. This parameter require [Impetus](https://github.com/SonoIo/impetus) library.
 - `maxZoom` optional (default `2`). It is the zoom max.
 - `onZoomEnd` optional (default `null`). It is a callback function called when the pinch ended.
 - `onZoom` optional (default `null`). It is a callback function called when zooming.
+- `threshold` optional (default `40`). Area (in px) of the screen to release touch events.
 
 ## API
 

@@ -1,5 +1,11 @@
 /*
 =================================
+img-touch-canvas - v1.0.0
+- Implement Impetus library for move the zoomed image
+- Pinch to zoom and center between the touches
+- Doubletap to zoom
+http://github.com/rombdn/img-touch-canvas
+
 img-touch-canvas - v0.1
 http://github.com/rombdn/img-touch-canvas
 
@@ -7,11 +13,6 @@ http://github.com/rombdn/img-touch-canvas
 This code may be freely distributed under the MIT License
 =================================
 */
-
-
-// (function() {
-//     var root = this; //global object
-
 
 (function (root, factory) {
 	if ( typeof define === "function" && define.amd ) {
@@ -33,6 +34,7 @@ This code may be freely distributed under the MIT License
 		var clientWidth  = options.canvas.clientWidth;
 		var clientHeight = options.canvas.clientHeight;
 
+		this.doubletap            = typeof options.doubletap == 'undefined' ? true : options.doubletap;
 		this.momentum             = options.momentum;
         this.canvas               = options.canvas;
         this.canvas.width         = clientWidth*2;
@@ -44,6 +46,7 @@ This code may be freely distributed under the MIT License
 		this.onZoomEnd            = options.onZoomEnd; // Callback of zoom end
 		this.onZoom               = options.onZoom; // Callback on zoom
 		this.initResizeProperty   = null;
+		this.threshold            = options.threshold || 40;
 
         this.position = {
             x: 0,
@@ -61,6 +64,10 @@ This code may be freely distributed under the MIT License
             x: 0,
             y: 0
         };
+		this.offeset = {
+			x: 0,
+			y: 0
+		};
 
         this.lastZoomScale = null;
         this.lastX         = null;
@@ -117,6 +124,12 @@ This code may be freely distributed under the MIT License
 					this.initialScale = scaleRatio;
                     this.init         = true;
 
+					this.offeset = {
+						x: this.canvas.getBoundingClientRect().left,
+						y: this.canvas.getBoundingClientRect().top
+					};
+
+
                 }
             }
 
@@ -127,6 +140,14 @@ This code may be freely distributed under the MIT License
                 this.position.x, this.position.y,
                 this.scale.x * this.imgTexture.width,
                 this.scale.y * this.imgTexture.height);
+
+			if ( this.tX ){
+
+				this.context.beginPath();
+				this.context.arc( this.tX ,this.tY, 5,0,2*Math.PI);
+				this.context.fillStyle = "red";
+				this.context.fill();
+			}
 
             requestAnimationFrame(this.animate.bind(this));
 
@@ -160,12 +181,12 @@ This code may be freely distributed under the MIT License
             return zoom;
         },
 
-        doZoom: function(zoom) {
+        doZoom: function(zoom, touchX, touchY) {
             if(!zoom) return;
 
             //new scale
             var currentScale = this.scale.x;
-            var newScale = this.scale.x + zoom/100;
+            var newScale     = this.scale.x + zoom/100;
             if( newScale < this.initialScale ) {
 					this.scaled = false;
 					this.position.x = this.initPosition.x;
@@ -179,32 +200,23 @@ This code may be freely distributed under the MIT License
                 newScale = this.maxZoom;
             }
 
-
-			//some helpers
-            var deltaScale    = newScale - currentScale;
-            var currentWidth  = (this.imgTexture.width * this.scale.x);
+			var deltaScale    = newScale - currentScale;
+			var currentWidth  = (this.imgTexture.width * this.scale.x);
             var currentHeight = (this.imgTexture.height * this.scale.y);
-            var deltaWidth    = this.imgTexture.width*deltaScale;
-            var deltaHeight   = this.imgTexture.height*deltaScale;
+			var deltaWidth    = this.imgTexture.width * deltaScale;
+            var deltaHeight   = this.imgTexture.height * deltaScale;
 
+			var tX = ( touchX * 2 - this.position.x );
+			var tY = ( touchY * 2 - this.position.y );
+			var pX = -tX / currentWidth;
+			var pY = -tY / currentHeight;
 
-            //by default scale doesnt change position and only add/remove pixel to right and bottom
-            //so we must move the image to the left to keep the image centered
-            //ex: coefX and coefY = 0.5 when image is centered <=> move image to the left 0.5x pixels added to the right
-            var canvasmiddleX = this.canvas.width / 2;
-            var canvasmiddleY = this.canvas.height / 2;
-            var xonmap = (-this.position.x) + canvasmiddleX;
-            var yonmap = (-this.position.y) + canvasmiddleY;
-            var coefX = -xonmap / (currentWidth);
-            var coefY = -yonmap / (currentHeight);
-            var newPosX = this.position.x + deltaWidth*coefX;
-            var newPosY = this.position.y + deltaHeight*coefY;
 
             //finally affectations
             this.scale.x    = newScale;
             this.scale.y    = newScale;
-            this.position.x = newPosX;
-            this.position.y = newPosY;
+            this.position.x += pX * deltaWidth;
+            this.position.y += pY * deltaHeight;
 
 			this.scaled = true;
 
@@ -219,7 +231,7 @@ This code may be freely distributed under the MIT License
 			if ( !this.momentum &&  this.lastX && this.lastY ){
 				var deltaX = relativeX - this.lastX;
 				var deltaY = relativeY - this.lastY;
-				var currentWidth = (this.imgTexture.width * this.scale.x);
+				var currentWidth  = (this.imgTexture.width * this.scale.x);
 				var currentHeight = (this.imgTexture.height * this.scale.y);
 
 				var clientWidth = this.canvas.width, clientHeight = this.canvas.height;
@@ -293,12 +305,15 @@ This code may be freely distributed under the MIT License
 					this.startZoom = true;
 					if ( this.momentum  )
 						this.destroyImpetus();
-					this.doZoom(this.gesturePinchZoom(e));
+
+					var x = ( e.targetTouches[0].pageX + e.targetTouches[1].pageX ) / 2;
+					var y = ( e.targetTouches[0].pageY + e.targetTouches[1].pageY ) / 2;
+					this.doZoom( this.gesturePinchZoom(e), x, y );
                 }
                 else if(e.targetTouches.length == 1) {
 					if ( !this.momentum  ){
-						var relativeX = e.targetTouches[0].pageX - this.canvas.getBoundingClientRect().left;
-						var relativeY = e.targetTouches[0].pageY - this.canvas.getBoundingClientRect().top;
+						var relativeX = e.targetTouches[0].pageX - this.offeset.x;
+						var relativeY = e.targetTouches[0].pageY - this.offeset.y;
 						this.doMove(relativeX, relativeY);
 					}
                 }
@@ -306,6 +321,32 @@ This code may be freely distributed under the MIT License
             }.bind(this);
 
 			this.eventTouchEnd = function(e) {
+
+				// Check if touchend
+				if ( !this.startZoom && e.changedTouches.length > 0 ){
+					var touch     = e.changedTouches[0]
+					var distance  = touch.pageX - (this.lastTouchPageX || 0);
+					var now       = new Date().getTime();
+					var lastTouch = this.lastTouchTime || now + 1 /** the first time this will make delta a negative number */;
+					var delta     = now - lastTouch;
+					if ( distance >= 0 && distance < this.threshold && delta > 0 && delta < 500 ){
+						this.lastTouchTime  = null;
+						this.lastTouchPageX = 0;
+						this.startZoom      = true;
+						if ( this.scaled ){
+							this.doZoom(-400);
+						}else{
+							this.doZoom(2000, touch.pageX - this.offeset.x, touch.pageY - this.offeset.y );
+						}
+					}else{
+						this.lastTouchTime = now;
+						this.lastTouchPageX = touch.pageX;
+					}
+				}else{
+					this.lastTouchTime  = null;
+					this.lastTouchPageX = 0;
+				}
+
 				if ( this.momentum ){
 					e.preventDefault();
 					if ( this.startZoom && this.scaled ){

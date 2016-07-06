@@ -32,6 +32,8 @@
 		html {
 		    height  : 100%;
 		    overflow: hidden;
+			-ms-content-zooming: none; /* Disables zooming */
+		    touch-action: none;   /* Disable any special actions on tap/touch */
 		}
 		body {
 		    height  : 100%;
@@ -49,7 +51,7 @@
 	<script src="impetus.js"></script>
     <script src="../img-touch-canvas.js"></script>
     <script>
-        var gesturableImg = new ImgTouchCanvas({
+        window.gesturableImg = new ImgTouchCanvas({
             canvas: document.getElementById('mycanvas'),
             path: "TIMG903-01.jpg", // "TIMG903-01.jpg" "UNCLE.jpg" "CM_BD_3D_Pack.jpg" "https://public.dm2302.livefilestore.com/y3pTiD2fb9CL3rhz9Y6D6T3w5gWRLCr5uxot89n_Bf4cVloetZtw77ZqhKlhfPcXXOCea6zD8ZKeKkBHcAAjr3Pnn8QTLlEaKSiKNOpW_1lrSE/CM_BD_3D_Pack.jpg?psid=1&rdrts=113827827", // "trollface.png",
             momentum: true,
