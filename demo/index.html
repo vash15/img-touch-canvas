@@ -42,27 +42,31 @@
 	</style>
 
 </head>
-<body>
+<body onload="onLoad();" >
 
     <div id="mycontainer" style="width: 100%; height: 100%"> <!-- set desired position and size to that div -->
         <canvas id="mycanvas" style="width: 100%; height: 100%"></canvas>
     </div>
 
 	<script src="impetus.js"></script>
-    <script src="../pinch-zoom-canvas.js"></script>
+    <script src="https://raw.githubusercontent.com/vash15/pinch-zoom-canvas/master/pinch-zoom-canvas.js"></script>
     <script>
-        window.pinchZoom = new PinchZoomCanvas({
-            canvas: document.getElementById('mycanvas'),
-            path: "TIMG903-01.jpg", // "TIMG903-01.jpg" "UNCLE.jpg" "CM_BD_3D_Pack.jpg" "https://public.dm2302.livefilestore.com/y3pTiD2fb9CL3rhz9Y6D6T3w5gWRLCr5uxot89n_Bf4cVloetZtw77ZqhKlhfPcXXOCea6zD8ZKeKkBHcAAjr3Pnn8QTLlEaKSiKNOpW_1lrSE/CM_BD_3D_Pack.jpg?psid=1&rdrts=113827827", // "trollface.png",
-            momentum: true,
-			onZoomEnd: function (zoom, zoomed) {
-				console.log("---> is zoomed: %s", zoomed);
-				console.log("---> zoom end at %s", zoom);
-			},
-			onZoom: function (zoom) {
-				console.log("---> zoom is %s", zoom);
-			}
-        });
+
+		function onLoad() {
+	        window.pinchZoom = new PinchZoomCanvas({
+	            canvas: document.getElementById('mycanvas'),
+	            path: "TIMG903-01.jpg", // "TIMG903-01.jpg" "UNCLE.jpg" "CM_BD_3D_Pack.jpg" "https://public.dm2302.livefilestore.com/y3pTiD2fb9CL3rhz9Y6D6T3w5gWRLCr5uxot89n_Bf4cVloetZtw77ZqhKlhfPcXXOCea6zD8ZKeKkBHcAAjr3Pnn8QTLlEaKSiKNOpW_1lrSE/CM_BD_3D_Pack.jpg?psid=1&rdrts=113827827", // "trollface.png",
+	            momentum: true,
+				onZoomEnd: function (zoom, zoomed) {
+					console.log("---> is zoomed: %s", zoomed);
+					console.log("---> zoom end at %s", zoom);
+				},
+				onZoom: function (zoom) {
+					console.log("---> zoom is %s", zoom);
+				}
+	        });
+		};
+		
     </script>
 </body>
 </html>
