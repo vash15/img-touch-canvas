@@ -1,93 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Img-touch-canvas : Light library to add touch gesture (pinch zoom) to individual images using vanilla HTML5 / JS" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Img-touch-canvas by vash15</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Img-touch-canvas</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Img-touch-canvas</h1>
+        <p>Light library to add touch gesture (pinch zoom) to individual images using vanilla HTML5 / JS</p>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/rombdn/img-touch-canvas">View on GitHub</a>
+        <p class="view"><a href="https://github.com/vash15/pinch-zoom-canvas">View the Project on GitHub <small>vash15/pinch-zoom-canvas</small></a></p>
 
-          <h1 id="project_title">Img-touch-canvas</h1>
-          <h2 id="project_tagline">Light library to add touch gesture (pinch zoom) to individual images using vanilla HTML5 / JS</h2>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/rombdn/img-touch-canvas/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/rombdn/img-touch-canvas/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+        <ul>
+          <li><a href="https://github.com/vash15/pinch-zoom-canvas/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/vash15/pinch-zoom-canvas/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/vash15/pinch-zoom-canvas">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
         <h1>
-<a name="imgtouchcanvas" class="anchor" href="#imgtouchcanvas"><span class="octicon octicon-link"></span></a>ImgTouchCanvas</h1>
+<a id="pinch-zoom-canvas" class="anchor" href="#pinch-zoom-canvas" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Pinch Zoom Canvas</h1>
 
-<p>Add touch gestures (pinch zoom and touch drag) to an image (like Google Maps).</p>
+<p>Strongly inspired by <a href="https://github.com/rombdn/img-touch-canvas">img-touch-canvas</a>.</p>
 
-<p>Based on a canvas element for smooth rendering.</p>
+<p>It's a simple library for pinch to zoom an image based on a canvas element for smooth rendering.
+The library use a Impetus for adding a momentus on move the image zoomed. Impetus is not required but recommended.</p>
 
-<p>Plain HTML5 / vanilla JS, no external libraries needed.</p>
+<h4>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features:</h4>
 
-<p>Tested in Chrome 28, Firefox 21, Android Browser 4.2.2 and Firefox for Android 18</p>
+<ul>
+<li>Momentum for move the image zoomed</li>
+<li>Pintch to zoom and center between the touches</li>
+<li>Double tap to zoom</li>
+<li>Stopping the event when the element is inactive</li>
+</ul>
 
-<p><strong>Github repo : <a href="https://github.com/rombdn/img-touch-canvas/">https://github.com/rombdn/img-touch-canvas/</a></strong></p>
+<p>This plugin is written in <strong>Vanilla JS</strong>.</p>
 
-<h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+<h4>
+<a id="tested-on" class="anchor" href="#tested-on" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tested on:</h4>
 
-<p><strong>See a live example here : <a href="http://www.rombdn.com/img-touch-canvas/demo">http://www.rombdn.com/img-touch-canvas/demo</a></strong></p>
-
-<p>Define a container in which the image will be able to be resized and moved, then add a canvas element.</p>
-
-<p>The image will be scaled to cover all the container so if you want the image to be showed at its original size by default 
-then set the container size to match the image original size (see example).</p>
-
-<pre><code>    &lt;html&gt;
-    &lt;body&gt;
-        &lt;div&gt; &lt;!-- set desired position and size to that div --&gt;
-            &lt;canvas id="mycanvas" style="width: 100%; height: 100%"&gt;&lt;/canvas&gt;
-        &lt;/div&gt;
-
-        &lt;script src="img-touch-canvas.js"&gt;&lt;/script&gt;
-        &lt;script&gt;
-            var gesturableImg = new ImgTouchCanvas({
-                canvas: document.getElementById('mycanvas'),
-                path: "your image url"
-            });
-        &lt;/script&gt;
-    &lt;/body&gt;
-    &lt;/html&gt;
-</code></pre>
+<ul>
+<li>iOS Safari (8.x, 9.x)</li>
+<li>Android Google Chrome</li>
+<li>Cordova App</li>
+<li>Google Chrome</li>
+</ul>
 
 <h2>
-<a name="licence" class="anchor" href="#licence"><span class="octicon octicon-link"></span></a>Licence</h2>
+<a id="options" class="anchor" href="#options" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Options</h2>
 
-<p>(c) 2013 Romain BEAUDON
-This code may be freely distributed under the MIT License</p>
+<ul>
+<li>
+<code>canvas</code> mandatory. It is a DOM element where the image is rendered.</li>
+<li>
+<code>path</code> mandatory. It is a path url of image.</li>
+<li>
+<code>doubletap</code> optional (default <code>true</code>). Double tap for zooming.</li>
+<li>
+<code>momentum</code> optional (defalut <code>false</code>). Set a momentum when the image is dragged. This parameter require <a href="https://github.com/SonoIo/impetus">Impetus</a> library.</li>
+<li>
+<code>maxZoom</code> optional (default <code>2</code>). It is the zoom max.</li>
+<li>
+<code>onZoomEnd</code> optional (default <code>null</code>). It is a callback function called when the pinch ended.</li>
+<li>
+<code>onZoom</code> optional (default <code>null</code>). It is a callback function called when zooming.</li>
+<li>
+<code>threshold</code> optional (default <code>40</code>). Area (in px) of the screen to release touch events.</li>
+</ul>
+
+<h2>
+<a id="api" class="anchor" href="#api" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API</h2>
+
+<h3>
+<a id="pause" class="anchor" href="#pause" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>pause()</h3>
+
+<p>Stop the render canvas.</p>
+
+<h3>
+<a id="resume" class="anchor" href="#resume" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>resume()</h3>
+
+<p>Resume the render canvas.</p>
+
+<h3>
+<a id="calculateoffset" class="anchor" href="#calculateoffset" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>calculateOffset()</h3>
+
+<p>Update the canvas offset.</p>
+
+<h3>
+<a id="iszommed" class="anchor" href="#iszommed" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>isZommed()</h3>
+
+<p>Return a boolean value for the image state of zoomed.</p>
+
+<h3>
+<a id="destroy" class="anchor" href="#destroy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>destroy()</h3>
+
+<p>Stop all events and render canvas.</p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">canvas</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">"</span>mycanvas<span class="pl-pds">"</span></span> <span class="pl-e">style</span>=<span class="pl-s"><span class="pl-pds">"</span>width: 100%; height: 100%<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">canvas</span>&gt;</pre></div>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">var</span> pinchZoom <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">PinchZoomCanvas</span>({
+    canvas<span class="pl-k">:</span> <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>mycanvas<span class="pl-pds">'</span></span>),
+    path<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>your image url<span class="pl-pds">"</span></span>,
+    momentum<span class="pl-k">:</span> <span class="pl-c1">true</span>,
+    zoomMax<span class="pl-k">:</span> <span class="pl-c1">2</span>,
+    doubletap<span class="pl-k">:</span> <span class="pl-c1">true</span>,
+    <span class="pl-en">onZoomEnd</span><span class="pl-k">:</span> <span class="pl-k">function</span> (<span class="pl-smi">zoom</span>, <span class="pl-smi">zoomed</span>) {
+        <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">"</span>---&gt; is zoomed: %s<span class="pl-pds">"</span></span>, zoomed);
+        <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">"</span>---&gt; zoom end at %s<span class="pl-pds">"</span></span>, zoom);
+    },
+    <span class="pl-en">onZoom</span><span class="pl-k">:</span> <span class="pl-k">function</span> (<span class="pl-smi">zoom</span>) {
+        <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">"</span>---&gt; zoom is %s<span class="pl-pds">"</span></span>, zoom);
+    }
+    });</pre></div>
+
+<h2>
+<a id="licence" class="anchor" href="#licence" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Licence</h2>
+
+<hr>
+
+<p>See the <a href="LICENSE.txt">LICENSE</a> file.</p>
       </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Img-touch-canvas maintained by <a href="https://github.com/rombdn">rombdn</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/vash15">vash15</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-
+    <script src="javascripts/scale.fix.js"></script>
     
-
   </body>
 </html>
