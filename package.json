@@ -1,8 +1,11 @@
 {
-    "name": "img-touch-canvas",
+    "name": "pinch-zoom-canvas",
     "version": "1.0.0",
     "description": "Pinch zoom to images based on canvas",
-    "main": "img-touch-canvas.js",
-	"author": "Romain BEAUDON",
-    "license": "MIT"
+    "main": "pinch-zoom-canvas.js",
+	"author": "Michele Belluco",
+    "license": "MIT",
+	"dependencies": {
+  	  "impetus": "https://github.com/SonoIo/impetus.git#master"
+    }
 }

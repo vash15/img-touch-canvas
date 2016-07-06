@@ -1,10 +1,11 @@
 {
-  "name": "img-touch-canvas",
-  "main": "img-touch-canvas.js",
+  "name": "pinch-zoom-canvas",
+  "main": "pinch-zoom-canvas.js",
   "version": "1.0.0",
-  "homepage": "https://github.com/rombdn/img-touch-canvas",
+  "homepage": "https://github.com/vash15/pinch-zoom-canvas",
   "authors": [
-    "Romain BEAUDON"
+    "Michele Belluco",
+	"Matteo Baggio"
   ],
   "description": "Pinch zoom to images based on canvas",
   "keywords": [

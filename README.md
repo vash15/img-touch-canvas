@@ -1,10 +1,27 @@
-# ImgTouchCanvas
+# Pinch Zoom Canvas
+
+Strongly inspired by [img-touch-canvas](https://github.com/rombdn/img-touch-canvas).
+
+It's a simple library for pinch to zoom an image based on a canvas element for smooth rendering.
+The library use a Impetus for adding a momentus on move the image zoomed. Impetus is not required but recommended.
+
+#### Features:
+
+- Momentum for move the image zoomed
+- Pintch to zoom and center between the touches
+- Double tap to zoom
+- Stopping the event when the element is inactive
+
+This plugin is written in **Vanilla JS**.
 
 
-Add touch gestures (pinch zoom and touch drag) to an image (like Google Maps).
-Based on a canvas element for smooth rendering.
-Plain HTML5 / vanilla JS, no external libraries needed.
-Tested in Android Browser, Android Google Chrome, iOS Safari
+#### Tested on:
+
+- iOS Safari (8.x, 9.x)
+- Android Google Chrome
+- Cordova App
+- Google Chrome
+
 
 ## Options
 
@@ -25,36 +42,40 @@ Stop the render canvas.
 ### resume()
 Resume the render canvas.
 
+### calculateOffset()
+Update the canvas offset.
+
+### isZommed()
+Return a boolean value for the image state of zoomed.
+
 ### destroy()
 Stop all events and render canvas.
 
 
 ## Usage
 
-**See a live example here : http://www.rombdn.com/img-touch-canvas/demo**
-
-Define a container in which the image will be able to be resized and moved, then add a canvas element.
-
-The image will be scaled to cover all the container so if you want the image to be showed at its original size by default
-then set the container size to match the image original size (see example).
-
 ```html
 <canvas id="mycanvas" style="width: 100%; height: 100%"></canvas>
 ```
 
 ```js
-	var gesturableImg = new ImgTouchCanvas({
-		momentum: true, // Require Impetus lib
-		canvas: document.getElementById('mycanvas'),
-		path: "your image url",
-		zoomMax: 2,
-		zoomEnd: function(zoom){
-			console.log("zoom %s", zoom);
-		}
+var pinchZoom = new PinchZoomCanvas({
+	canvas: document.getElementById('mycanvas'),
+	path: "your image url",
+	momentum: true,
+	zoomMax: 2,
+	doubletap: true,
+	onZoomEnd: function (zoom, zoomed) {
+		console.log("---> is zoomed: %s", zoomed);
+		console.log("---> zoom end at %s", zoom);
+	},
+	onZoom: function (zoom) {
+		console.log("---> zoom is %s", zoom);
+	}
 	});
 ```
 
 ## Licence
 ------------
-(c) 2013-2016 Romain BEAUDON
+(c) 2016 Michele Belluco & Matteo Baggio
 This code may be freely distributed under the MIT License

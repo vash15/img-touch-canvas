@@ -1,35 +1,22 @@
-/*
-=================================
-img-touch-canvas - v1.0.0
-- Implement Impetus library for move the zoomed image
-- Pinch to zoom and center between the touches
-- Doubletap to zoom
-http://github.com/rombdn/img-touch-canvas
-
-img-touch-canvas - v0.1
-http://github.com/rombdn/img-touch-canvas
-
-(c) 2013 Romain BEAUDON
-This code may be freely distributed under the MIT License
-=================================
-*/
-
 (function (root, factory) {
 	if ( typeof define === "function" && define.amd ) {
 		define(["impetus"], function(Impetus){
-			return (root.ImgTouchCanvas = factory(Impetus));
+			return (root.PinchZoomCanvas = factory(Impetus));
 		});
 	} else if(typeof module === "object" && module.exports) {
-		module.exports = (root.ImgTouchCanvas = factory(require("impetus")));
+		module.exports = (root.PinchZoomCanvas = factory(require("impetus")));
 	} else {
-		root.ImgTouchCanvas = factory(root.Impetus);
+		root.PinchZoomCanvas = factory(root.Impetus);
 	}
 }(this, function(Impetus) {
 
-    var ImgTouchCanvas = function(options) {
+    var PinchZoomCanvas = function(options) {
         if( !options || !options.canvas || !options.path) {
-            throw 'ImgZoom constructor: missing arguments canvas or path';
+            throw 'PinchZoomCanvas constructor: missing arguments canvas or path';
         }
+
+		// Check if exists function requestAnimationFrame
+		this._checkRequestAnimationFrame();
 
 		var clientWidth  = options.canvas.clientWidth;
 		var clientHeight = options.canvas.clientHeight;
@@ -48,6 +35,7 @@ This code may be freely distributed under the MIT License
 		this.initResizeProperty   = null;
 		this.threshold            = options.threshold || 40;
 
+		// Init
         this.position = {
             x: 0,
             y: 0
@@ -75,21 +63,28 @@ This code may be freely distributed under the MIT License
 		this.startZoom     = false;
         this.init          = false;
 		this.running       = true;
+		this.zoomed        = false;
 
-		this.checkRequestAnimationFrame();
+		// Bind events
+		this.onTouchStart = this.onTouchStart.bind(this);
+		this.onTouchMove  = this.onTouchMove.bind(this);
+		this.onTouchEnd   = this.onTouchEnd.bind(this);
+		this.render       = this.render.bind(this);
 
+		// Load the image
 		this.imgTexture = new Image();
 		this.imgTexture.onload = function(){
-			requestAnimationFrame(this.animate.bind(this));
-	        this.setEventListeners();
+			requestAnimationFrame(this.render);
+	        this._setEventListeners();
 		}.bind(this);
-        this.imgTexture.src = options.path;
+		this.imgTexture.src = options.path;
 
     };
 
-    ImgTouchCanvas.prototype = {
+    PinchZoomCanvas.prototype = {
 
-        animate: function() {
+		// Render method. It starts in infinite loop in each requestAnimationFrame of the browser.
+		render: function() {
 			if ( this.init && !this.running )
 				return this;
 
@@ -125,7 +120,7 @@ This code may be freely distributed under the MIT License
                     this.init         = true;
 
 					this.calculateOffset();
-					
+
                 }
             }
 
@@ -137,16 +132,7 @@ This code may be freely distributed under the MIT License
                 this.scale.x * this.imgTexture.width,
                 this.scale.y * this.imgTexture.height);
 
-			if ( this.tX ){
-
-				this.context.beginPath();
-				this.context.arc( this.tX ,this.tY, 5,0,2*Math.PI);
-				this.context.fillStyle = "red";
-				this.context.fill();
-			}
-
-            requestAnimationFrame(this.animate.bind(this));
-
+			requestAnimationFrame(this.render);
         },
 
 		pause: function () {
@@ -157,7 +143,7 @@ This code may be freely distributed under the MIT License
 		resume: function () {
 			this.calculateOffset();
 			this.running = true;
-			requestAnimationFrame(this.animate.bind(this));
+			requestAnimationFrame(this.render);
 			return this;
 		},
 
@@ -169,31 +155,14 @@ This code may be freely distributed under the MIT License
 			return this;
 		},
 
-        gesturePinchZoom: function(event) {
-            var zoom = false;
-
-            if( event.targetTouches.length >= 2 ) {
-                var p1 = event.targetTouches[0];
-                var p2 = event.targetTouches[1];
-                var zoomScale = Math.sqrt(Math.pow(p2.pageX - p1.pageX, 2) + Math.pow(p2.pageY - p1.pageY, 2)); // euclidian distance
-
-                if( this.lastZoomScale ) {
-                    zoom = zoomScale - this.lastZoomScale;
-                }
-
-                this.lastZoomScale = zoomScale;
-            }
-            return zoom;
-        },
-
-        doZoom: function(zoom, touchX, touchY) {
+        zoom: function(zoom, touchX, touchY) {
             if(!zoom) return;
 
             //new scale
             var currentScale = this.scale.x;
             var newScale     = this.scale.x + zoom/100;
             if( newScale < this.initialScale ) {
-					this.scaled = false;
+					this.zoomed = false;
 					this.position.x = this.initPosition.x;
 					this.position.y = this.initPosition.y;
 					this.scale.x = this.initialScale;
@@ -223,15 +192,16 @@ This code may be freely distributed under the MIT License
             this.position.x += pX * deltaWidth;
             this.position.y += pY * deltaHeight;
 
-			this.scaled = true;
+			this.zoomed = true;
 
 			// zoom scale callback
             if (this.onZoom){
-                this.onZoom(newScale, this.scaled);
+                this.onZoom(newScale, this.zoomed);
             }
+
         },
 
-		doMove: function(relativeX, relativeY) {
+		move: function(relativeX, relativeY) {
 
 			if ( !this.momentum &&  this.lastX && this.lastY ){
 				var deltaX = relativeX - this.lastX;
@@ -292,96 +262,45 @@ This code may be freely distributed under the MIT License
 			this.lastY = relativeY;
 		},
 
-        setEventListeners: function() {
+		isZommed: function () {
+			return this.zoomed;
+		},
 
-			// Callback events
-			this.eventTouchStart = function(e) {
-                this.lastX          = null;
-                this.lastY          = null;
-                this.lastZoomScale  = null;
-            }.bind(this);
+		destroy: function () {
+			this.pause();
+			this._removeEventListeners();
+			this._destroyImpetus();
+			this.imgTexture = null;
+			this.canvas = null;
+		},
 
-			this.eventTouchMove = function(e) {
-				if ( this.scaled )
-					e.preventDefault();
+		//
+		// Private
+		//
 
-				if(e.targetTouches.length == 2) { //pinch
+		_gesturePinchZoom: function(event) {
+            var zoom = false;
 
-					this.startZoom = true;
-					if ( this.momentum  )
-						this.destroyImpetus();
+            if( event.targetTouches.length >= 2 ) {
+                var p1 = event.targetTouches[0];
+                var p2 = event.targetTouches[1];
+                var zoomScale = Math.sqrt(Math.pow(p2.pageX - p1.pageX, 2) + Math.pow(p2.pageY - p1.pageY, 2)); // euclidian distance
 
-					var x = ( e.targetTouches[0].pageX + e.targetTouches[1].pageX ) / 2;
-					var y = ( e.targetTouches[0].pageY + e.targetTouches[1].pageY ) / 2;
-					this.doZoom( this.gesturePinchZoom(e), x, y );
-                }
-                else if(e.targetTouches.length == 1) {
-					if ( !this.momentum  ){
-						var relativeX = e.targetTouches[0].pageX - this.offeset.x;
-						var relativeY = e.targetTouches[0].pageY - this.offeset.y;
-						this.doMove(relativeX, relativeY);
-					}
+                if( this.lastZoomScale ) {
+                    zoom = zoomScale - this.lastZoomScale;
                 }
 
-            }.bind(this);
-
-			this.eventTouchEnd = function(e) {
-
-				// Check if touchend
-				if ( !this.startZoom && e.changedTouches.length > 0 ){
-					var touch     = e.changedTouches[0]
-					var distance  = touch.pageX - (this.lastTouchPageX || 0);
-					var now       = new Date().getTime();
-					var lastTouch = this.lastTouchTime || now + 1 /** the first time this will make delta a negative number */;
-					var delta     = now - lastTouch;
-					if ( distance >= 0 && distance < this.threshold && delta > 0 && delta < 500 ){
-						this.lastTouchTime  = null;
-						this.lastTouchPageX = 0;
-						this.startZoom      = true;
-						if ( this.scaled ){
-							this.doZoom(-400);
-						}else{
-							this.doZoom(2000, touch.pageX - this.offeset.x, touch.pageY - this.offeset.y );
-						}
-					}else{
-						this.lastTouchTime = now;
-						this.lastTouchPageX = touch.pageX;
-					}
-				}else{
-					this.lastTouchTime  = null;
-					this.lastTouchPageX = 0;
-				}
-
-				if ( this.momentum ){
-					e.preventDefault();
-					if ( this.startZoom && this.scaled ){
-						this.createImpetus();
-					}else if ( this.scaled === false ) {
-						this.destroyImpetus();
-					}
-				}
-
-				if ( this.startZoom && typeof this.onZoomEnd === 'function' )
-					this.onZoomEnd( Math.round(this.scale.x*100)/100, this.scaled );
-
-				this.startZoom = false;
-
-			}.bind(this);
-
-
-			// Assign event
-            this.canvas.addEventListener('touchstart', this.eventTouchStart );
-            this.canvas.addEventListener('touchmove', this.eventTouchMove );
-			this.canvas.addEventListener('touchend', this.eventTouchEnd );
-
+                this.lastZoomScale = zoomScale;
+            }
+            return zoom;
         },
 
-        checkRequestAnimationFrame: function() {
+		_checkRequestAnimationFrame: function() {
 			if ( window.requestAnimationFrame )
 				return this;
 
-            var lastTime = 0;
-            var vendors = ['ms', 'moz', 'webkit', 'o'];
+			var lastTime = 0;
+            var vendors  = ['ms', 'moz', 'webkit', 'o'];
             for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
                 window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
                 window.cancelAnimationFrame =
@@ -404,26 +323,11 @@ This code may be freely distributed under the MIT License
                     clearTimeout(id);
                 };
             }
-
 			return this;
         },
 
-		destroy: function () {
 
-			this.pause();
-
-			this.canvas.removeEventListener('touchstart', this.eventTouchStart );
-            this.canvas.removeEventListener('touchmove', this.eventTouchMove );
-			this.canvas.removeEventListener('touchend', this.eventTouchEnd );
-
-			this.destroyImpetus();
-
-			this.imgTexture = null;
-			this.canvas = null;
-
-		},
-
-		createImpetus: function () {
+		_createImpetus: function () {
 			if ( typeof Impetus === 'undefined' || !this.momentum || this.impetus) return;
 
 			var boundX, boundY;
@@ -455,20 +359,110 @@ This code may be freely distributed under the MIT License
 				friction: 0.96,
 				multiplier: 2,
 				update: function(x, y) {
-					this.doMove(x, y);
+					this.move(x, y);
 				}.bind(this)
 			});
 
 		},
 
-		destroyImpetus: function() {
+		_destroyImpetus: function() {
 			if ( this.impetus && this.impetus.destroy )
 				this.impetus.destroy();
 			this.impetus = null;
+		},
+
+
+		_setEventListeners: function() {
+            this.canvas.addEventListener('touchstart', this.onTouchStart );
+            this.canvas.addEventListener('touchmove', this.onTouchMove );
+			this.canvas.addEventListener('touchend', this.onTouchEnd );
+			return this;
+        },
+
+		_removeEventListeners: function () {
+			this.canvas.removeEventListener('touchstart', this.onTouchStart );
+            this.canvas.removeEventListener('touchmove', this.onTouchMove );
+			this.canvas.removeEventListener('touchend', this.onTouchEnd );
+			return this;
+		},
+
+		//
+		// Events
+		//
+
+		onTouchStart: function () {
+			this.lastX          = null;
+			this.lastY          = null;
+			this.lastZoomScale  = null;
+		},
+
+		onTouchMove: function(e) {
+			if ( this.zoomed )
+				e.preventDefault();
+
+			if(e.targetTouches.length == 2) { //pinch
+
+				this.startZoom = true;
+				if ( this.momentum  )
+					this._destroyImpetus();
+
+				var x = ( e.targetTouches[0].pageX + e.targetTouches[1].pageX ) / 2;
+				var y = ( e.targetTouches[0].pageY + e.targetTouches[1].pageY ) / 2;
+				this.zoom( this._gesturePinchZoom(e), x, y );
+			}
+			else if(e.targetTouches.length == 1) {
+				if ( !this.momentum  ){
+					var relativeX = e.targetTouches[0].pageX - this.offeset.x;
+					var relativeY = e.targetTouches[0].pageY - this.offeset.y;
+					this.move(relativeX, relativeY);
+				}
+			}
+
+		},
+
+		onTouchEnd: function(e) {
+			// Check if touchend
+			if ( this.doubletap && !this.startZoom && e.changedTouches.length > 0 ){
+				var touch     = e.changedTouches[0]
+				var distance  = touch.pageX - (this.lastTouchPageX || 0);
+				var now       = new Date().getTime();
+				var lastTouch = this.lastTouchTime || now + 1 /** the first time this will make delta a negative number */;
+				var delta     = now - lastTouch;
+				if ( distance >= 0 && distance < this.threshold && delta > 0 && delta < 500 ){
+					this.lastTouchTime  = null;
+					this.lastTouchPageX = 0;
+					this.startZoom      = true;
+					if ( this.zoomed ){
+						this.zoom(-400);
+					}else{
+						this.zoom(2000, touch.pageX - this.offeset.x, touch.pageY - this.offeset.y );
+					}
+				}else{
+					this.lastTouchTime = now;
+					this.lastTouchPageX = touch.pageX;
+				}
+			}else{
+				this.lastTouchTime  = null;
+				this.lastTouchPageX = 0;
+			}
+
+			if ( this.momentum ){
+				e.preventDefault();
+				if ( this.startZoom && this.zoomed ){
+					this._createImpetus();
+				}else if ( this.zoomed === false ) {
+					this._destroyImpetus();
+				}
+			}
+
+			if ( this.startZoom && typeof this.onZoomEnd === 'function' )
+				this.onZoomEnd( Math.round(this.scale.x*100)/100, this.zoomed );
+
+			this.startZoom = false;
+
 		}
+    }
 
-    };
-
-    return ImgTouchCanvas;
+    return PinchZoomCanvas;
 
 }));
