@@ -77,5 +77,4 @@ var pinchZoom = new PinchZoomCanvas({
 
 ## Licence
 ------------
-(c) 2016 Michele Belluco & Matteo Baggio
-This code may be freely distributed under the MIT License
+See the [LICENSE](LICENSE.txt) file.
