@@ -22,6 +22,10 @@ This plugin is written in **Vanilla JS**.
 - Cordova App
 - Google Chrome
 
+#### Demo
+
+[Open this link into mobile device](https://vash15.github.io/pinch-zoom-canvas/demo/)
+
 
 ## Options
 
