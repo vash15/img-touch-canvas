@@ -124,12 +124,8 @@ This code may be freely distributed under the MIT License
 					this.initialScale = scaleRatio;
                     this.init         = true;
 
-					this.offeset = {
-						x: this.canvas.getBoundingClientRect().left,
-						y: this.canvas.getBoundingClientRect().top
-					};
-
-
+					this.calculateOffset();
+					
                 }
             }
 
@@ -159,8 +155,17 @@ This code may be freely distributed under the MIT License
 		},
 
 		resume: function () {
+			this.calculateOffset();
 			this.running = true;
 			requestAnimationFrame(this.animate.bind(this));
+			return this;
+		},
+
+		calculateOffset: function () {
+			if (!this.canvas)
+				return this;
+			this.offeset.x = this.canvas.getBoundingClientRect().left;
+			this.offeset.y = this.canvas.getBoundingClientRect().top;
 			return this;
 		},
 
