@@ -27,6 +27,27 @@ This plugin is written in **Vanilla JS**.
 [Open this link into mobile device](https://vash15.github.io/pinch-zoom-canvas/demo/)
 
 
+## Install
+
+#### bower
+
+```
+$ bower install --save pinch-zoom-canvas
+```
+
+#### npm
+
+```
+$ npm install --save pinch-zoom-canvas
+```
+
+#### browser
+
+```html
+<script src="pinch-zoom-canvas.js"></script>
+```
+
+
 ## Options
 
 - `canvas` mandatory. It is a DOM element where the image is rendered.
