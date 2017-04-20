@@ -162,7 +162,7 @@
             var currentScale = this.scale.x;
             var newScale     = this.scale.x + zoom/100;
             if( newScale < this.initialScale ) {
-					this.zoomed = false;
+					//this.zoomed = false;
 					this.position.x = this.initPosition.x;
 					this.position.y = this.initPosition.y;
 					this.scale.x = this.initialScale;
