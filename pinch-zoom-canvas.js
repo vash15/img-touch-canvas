@@ -34,6 +34,7 @@
 		this.onZoom               = options.onZoom; // Callback on zoom
 		this.initResizeProperty   = null;
 		this.threshold            = options.threshold || 40;
+		this.startingScale		  = options.startingScale || 1;
 
 		// Init
         this.position = {
@@ -116,7 +117,7 @@
 						x: this.position.x,
 						y: this.position.y
 					};
-					this.initialScale = scaleRatio * 2;
+					this.initialScale = scaleRatio * this.startingScale;
                     this.init         = true;
 
 					this.calculateOffset();
@@ -150,8 +151,10 @@
 		calculateOffset: function () {
 			if (!this.canvas)
 				return this;
-			this.offeset.x = this.canvas.getBoundingClientRect().left;
-			this.offeset.y = this.canvas.getBoundingClientRect().top;
+			const canvasBox = this.canvas.getBoundingClientRect();
+
+			this.offeset.x = canvasBox.left;
+			this.offeset.y = canvasBox.top;
 			return this;
 		},
 
@@ -262,7 +265,7 @@
 			this.lastY = relativeY;
 		},
 
-		isZommed: function () {
+		isZoomed: function () {
 			return this.zoomed;
 		},
 
