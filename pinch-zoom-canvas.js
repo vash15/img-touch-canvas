@@ -41,12 +41,12 @@
             y: 0
         };
         this.scale = {
-            x: 0.5,
-            y: 0.5
+            x: 1,
+            y: 1
         };
 		this.initScale = {
-            x: 0.5,
-            y: 0.5
+            x: 1,
+            y: 1
         };
 		this.initPosition = {
             x: 0,
@@ -98,13 +98,13 @@
 
 					if (imageRatio >= viewportRatio) {
 						this.initResizeProperty = 'width';
-						scaleRatio = this.canvas.width / this.imgTexture.width;
-						this.position.x = 0;
+						scaleRatio = this.canvas.width / this.imgTexture.width * 2;
+						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
 						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
 
 					}else if (imageRatio < viewportRatio) {
 						this.initResizeProperty = 'height';
-						scaleRatio = this.canvas.height / this.imgTexture.height;
+						scaleRatio = this.canvas.height / this.imgTexture.height * 2;
 						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
 						this.position.y = 0;
 					}
@@ -116,7 +116,7 @@
 						x: this.position.x,
 						y: this.position.y
 					};
-					this.initialScale = scaleRatio;
+					this.initialScale = scaleRatio * 2;
                     this.init         = true;
 
 					this.calculateOffset();
