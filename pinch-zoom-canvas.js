@@ -107,7 +107,7 @@
 						this.initResizeProperty = 'height';
 						scaleRatio = this.canvas.height / this.imgTexture.height * 2;
 						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
-						this.position.y = 0;
+						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
 					}
 
                     this.scale.x = scaleRatio;
@@ -165,9 +165,10 @@
             var currentScale = this.scale.x;
             var newScale     = this.scale.x + zoom/100;
             if( newScale < this.initialScale ) {
+					// TODO: Can we make these options or fix the math for scales?
 					//this.zoomed = false;
-					this.position.x = this.initPosition.x;
-					this.position.y = this.initPosition.y;
+					// this.position.x = this.initPosition.x;
+					// this.position.y = this.initPosition.y;
 					this.scale.x = this.initialScale;
 					this.scale.y = this.initialScale;
 					return;
