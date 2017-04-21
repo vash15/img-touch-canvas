@@ -42,12 +42,12 @@
             y: 0
         };
         this.scale = {
-            x: 1,
-            y: 1
+            x: 1, // originally 0.5 hardcoded to 1
+            y: 1 // originally 0.5 hardcoded to 1
         };
 		this.initScale = {
-            x: 1,
-            y: 1
+            x: 1, // originally 0.5 hardcoded to 1
+            y: 1 // originally 0.5 hardcoded to 1
         };
 		this.initPosition = {
             x: 0,
@@ -99,13 +99,13 @@
 
 					if (imageRatio >= viewportRatio) {
 						this.initResizeProperty = 'width';
-						scaleRatio = this.canvas.width / this.imgTexture.width * 2;
+						scaleRatio = this.canvas.width / this.imgTexture.width * 2 // hardcoded startingScale multiplier;
 						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
 						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
 
 					}else if (imageRatio < viewportRatio) {
 						this.initResizeProperty = 'height';
-						scaleRatio = this.canvas.height / this.imgTexture.height * 2;
+						scaleRatio = this.canvas.height / this.imgTexture.height * 2; // hardcoded startingScale multiplier
 						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
 						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
 					}
@@ -166,6 +166,7 @@
             var newScale     = this.scale.x + zoom/100;
             if( newScale < this.initialScale ) {
 					// TODO: Can we make these options or fix the math for scales?
+					// TODO: Make bounceback on zoomed to in or out instead of hard setting
 					//this.zoomed = false;
 					// this.position.x = this.initPosition.x;
 					// this.position.y = this.initPosition.y;
