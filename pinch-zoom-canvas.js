@@ -169,20 +169,18 @@
             var currentScale = this.scale.x;
             var newScale     = this.scale.x + zoom/100;
 
-			// handle if we are smaller than the initial scale
+			// handle if we are smaller than the initial scale or larger than max
             if( newScale < this.initialScale ) {
 					// TODO: Can we make these options or fix the math for scales?
 					// TODO: Make bounceback on zoomed to in or out instead of hard setting
 					// this.zoomed = false; // prevents movement when not zoomed
 					// this.position.x = this.initPosition.x;
 					// this.position.y = this.initPosition.y;
-					this.scale.x = this.initialScale;
-					this.scale.y = this.initialScale;
-					return;
-			};
-
-			// handle if we are larger than the initial scale
-            if (this.maxZoom && newScale > this.maxZoom){
+					// this.scale.x = this.initialScale;
+					// this.scale.y = this.initialScale;
+					newScale = this.initialScale;
+					// return;
+			} else if (this.maxZoom && newScale > this.maxZoom){
                 // could just return but then won't stop exactly at maxZoom
                 newScale = this.maxZoom;
             }
