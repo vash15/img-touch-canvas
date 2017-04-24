@@ -42,12 +42,12 @@
             y: 0
         };
         this.scale = {
-            x: 1, // originally 0.5 hardcoded to 1
-            y: 1 // originally 0.5 hardcoded to 1
+            x: 0.5, // originally 0.5 hardcoded to 1
+            y: 0.5 // originally 0.5 hardcoded to 1
         };
 		this.initScale = {
-            x: 1, // originally 0.5 hardcoded to 1
-            y: 1 // originally 0.5 hardcoded to 1
+            x: 0.5, // originally 0.5 hardcoded to 1
+            y: 0.5 // originally 0.5 hardcoded to 1
         };
 		this.initPosition = {
             x: 0,
@@ -99,13 +99,13 @@
 
 					if (imageRatio >= viewportRatio) {
 						this.initResizeProperty = 'width';
-						scaleRatio = this.canvas.width / this.imgTexture.width * 2 // hardcoded startingScale multiplier;
+						scaleRatio = this.canvas.width / this.imgTexture.width * this.startingScale // hardcoded startingScale multiplier;
 						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
 						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
 
 					}else if (imageRatio < viewportRatio) {
 						this.initResizeProperty = 'height';
-						scaleRatio = this.canvas.height / this.imgTexture.height * 2; // hardcoded startingScale multiplier
+						scaleRatio = this.canvas.height / this.imgTexture.height * this.startingScale; // hardcoded startingScale multiplier
 						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
 						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
 					}
