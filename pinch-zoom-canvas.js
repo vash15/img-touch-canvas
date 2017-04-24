@@ -49,7 +49,7 @@
             x: 0,
             y: 0
         };
-		this.offeset = {
+		this.offset = {
 			x: 0,
 			y: 0
 		};
@@ -149,8 +149,8 @@
 				return this;
 			const canvasBox = this.canvas.getBoundingClientRect();
 
-			this.offeset.x = canvasBox.left;
-			this.offeset.y = canvasBox.top;
+			this.offset.x = canvasBox.left;
+			this.offset.y = canvasBox.top;
 			return this;
 		},
 
@@ -413,8 +413,8 @@
 			}
 			else if(e.targetTouches.length == 1) {
 				if ( !this.momentum  ){
-					var relativeX = e.targetTouches[0].pageX - this.offeset.x;
-					var relativeY = e.targetTouches[0].pageY - this.offeset.y;
+					var relativeX = e.targetTouches[0].pageX - this.offset.x;
+					var relativeY = e.targetTouches[0].pageY - this.offset.y;
 					this.move(relativeX, relativeY);
 				}
 			}
@@ -436,7 +436,7 @@
 					if ( this.zoomed ){
 						this.zoom(-400);
 					}else{
-						this.zoom(2000, touch.pageX - this.offeset.x, touch.pageY - this.offeset.y );
+						this.zoom(2000, touch.pageX - this.offset.x, touch.pageY - this.offset.y );
 					}
 				}else{
 					this.lastTouchTime = now;
