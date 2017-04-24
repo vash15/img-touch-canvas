@@ -45,10 +45,6 @@
             x: 0.5, // originally 0.5 hardcoded to 1
             y: 0.5 // originally 0.5 hardcoded to 1
         };
-		this.initScale = {
-            x: 0.5, // originally 0.5 hardcoded to 1
-            y: 0.5 // originally 0.5 hardcoded to 1
-        };
 		this.initPosition = {
             x: 0,
             y: 0
