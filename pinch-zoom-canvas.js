@@ -42,8 +42,8 @@
             y: 0
         };
         this.scale = {
-            x: 0.5, // originally 0.5 hardcoded to 1
-            y: 0.5 // originally 0.5 hardcoded to 1
+            x: 0.5,
+            y: 0.5
         };
 		this.initPosition = {
             x: 0,
@@ -163,7 +163,7 @@
             if( newScale < this.initialScale ) {
 					// TODO: Can we make these options or fix the math for scales?
 					// TODO: Make bounceback on zoomed to in or out instead of hard setting
-					//this.zoomed = false;
+					this.zoomed = false;
 					// this.position.x = this.initPosition.x;
 					// this.position.y = this.initPosition.y;
 					this.scale.x = this.initialScale;
