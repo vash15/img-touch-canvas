@@ -85,7 +85,7 @@
 			if ( this.init && !this.running )
 				return this;
 
-            //set scale such as image cover all the canvas
+            //set initial scale such as image cover all the canvas
             if( !this.init ) {
 				if ( this.imgTexture.width ) {
 
@@ -93,36 +93,41 @@
 					var imageRatio    = this.imgTexture.width / this.imgTexture.height;
 				    var scaleRatio    = null;
 
-					if (imageRatio >= viewportRatio) {
+					if (imageRatio >= viewportRatio) { // wide image
 						this.initResizeProperty = 'width';
 						scaleRatio = this.canvas.width / this.imgTexture.width * this.startingScale // hardcoded startingScale multiplier;
-						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
-						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
+						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2; // center horizontal
+						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2; // center vertical
 
-					}else if (imageRatio < viewportRatio) {
+					}else if (imageRatio < viewportRatio) { // tall image
 						this.initResizeProperty = 'height';
 						scaleRatio = this.canvas.height / this.imgTexture.height * this.startingScale; // hardcoded startingScale multiplier
-						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2;
-						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2;
+						this.position.x = (this.canvas.width - this.imgTexture.width *  scaleRatio ) / 2; // center horizontal
+						this.position.y = (this.canvas.height - this.imgTexture.height *  scaleRatio ) / 2; // center vertical
 					}
 
+					// scale x and y to init scaleRatio calculation
                     this.scale.x = scaleRatio;
                     this.scale.y = scaleRatio;
 
+					// initial position is centered in the canvas
 					this.initPosition = {
 						x: this.position.x,
 						y: this.position.y
 					};
+
+					// the initial scale is the scaling ratio * the desired startingScale
 					this.initialScale = scaleRatio * this.startingScale;
-                    this.init         = true;
+                    this.calculateOffset();
 
-					this.calculateOffset();
-
+					this.init         = true; // done initializing!
                 }
             }
 
+			// erases the canvas
             this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+			// draws the image position and scale
             this.context.drawImage(
                 this.imgTexture,
                 this.position.x, this.position.y,
@@ -144,6 +149,9 @@
 			return this;
 		},
 
+		/**
+		 * Calculates the offset of the canvas position relative to it's container
+		 */
 		calculateOffset: function () {
 			if (!this.canvas)
 				return this;
@@ -160,16 +168,20 @@
             //new scale
             var currentScale = this.scale.x;
             var newScale     = this.scale.x + zoom/100;
+
+			// handle if we are smaller than the initial scale
             if( newScale < this.initialScale ) {
 					// TODO: Can we make these options or fix the math for scales?
 					// TODO: Make bounceback on zoomed to in or out instead of hard setting
-					this.zoomed = false;
+					// this.zoomed = false; // prevents movement when not zoomed
 					// this.position.x = this.initPosition.x;
 					// this.position.y = this.initPosition.y;
 					this.scale.x = this.initialScale;
 					this.scale.y = this.initialScale;
 					return;
 			};
+
+			// handle if we are larger than the initial scale
             if (this.maxZoom && newScale > this.maxZoom){
                 // could just return but then won't stop exactly at maxZoom
                 newScale = this.maxZoom;
