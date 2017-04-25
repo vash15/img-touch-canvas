@@ -1,6 +1,6 @@
 {
   "name": "pinch-zoom-canvas",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Pinch zoom to images based on canvas",
   "main": "pinch-zoom-canvas.js",
   "scripts": {
@@ -22,7 +22,9 @@
   ],
   "author": "Michele Belluco",
   "contributors": [
-	  "Matteo Baggio"
+	  "Matteo Baggio",
+    "Thomas Burketta",
+    "Jered Cuenco"
   ],
   "license": "MIT",
   "bugs": {
