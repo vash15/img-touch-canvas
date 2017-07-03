@@ -10,10 +10,12 @@
 	}
 }(this, function(Impetus) {
 
-    var PinchZoomCanvas = function(options) {
-        if( !options || !options.canvas || !options.path) {
-            throw 'PinchZoomCanvas constructor: missing arguments canvas or path';
-        }
+	var timeout;
+	var cache = [];
+	var PinchZoomCanvas = function(options) {
+		if( !options || !options.canvas || !options.path) {
+			throw 'PinchZoomCanvas constructor: missing arguments canvas or path';
+		}
 
 		// Check if exists function requestAnimationFrame
 		this._checkRequestAnimationFrame();
@@ -23,45 +25,46 @@
 
 		this.doubletap            = typeof options.doubletap == 'undefined' ? true : options.doubletap;
 		this.momentum             = options.momentum;
-        this.canvas               = options.canvas;
-        this.canvas.width         = clientWidth*2;
-        this.canvas.height        = clientHeight*2;
+		this.canvas               = options.canvas;
+		this.canvas.width         = clientWidth*2;
+		this.canvas.height        = clientHeight*2;
 		this.canvas.style.width   = clientWidth+'px';
 		this.canvas.style.height  = clientHeight+'px';
-        this.context              = this.canvas.getContext('2d');
+		this.context              = this.canvas.getContext('2d');
 		this.maxZoom              = (options.maxZoom || 2)*2;
 		this.onZoomEnd            = options.onZoomEnd; // Callback of zoom end
 		this.onZoom               = options.onZoom; // Callback on zoom
 		this.initResizeProperty   = null;
 		this.threshold            = options.threshold || 40;
+		this.emptyImage           = options.emptyImage || 'empty.gif';
 
 		// Init
-        this.position = {
-            x: 0,
-            y: 0
-        };
-        this.scale = {
-            x: 0.5,
-            y: 0.5
-        };
+		this.position = {
+			x: 0,
+			y: 0
+		};
+		this.scale = {
+			x: 0.5,
+			y: 0.5
+		};
 		this.initScale = {
-            x: 0.5,
-            y: 0.5
-        };
+			x: 0.5,
+			y: 0.5
+		};
 		this.initPosition = {
-            x: 0,
-            y: 0
-        };
+			x: 0,
+			y: 0
+		};
 		this.offeset = {
 			x: 0,
 			y: 0
 		};
 
-        this.lastZoomScale = null;
-        this.lastX         = null;
-        this.lastY         = null;
+		this.lastZoomScale = null;
+		this.lastX         = null;
+		this.lastY         = null;
 		this.startZoom     = false;
-        this.init          = false;
+		this.init          = false;
 		this.running       = true;
 		this.zoomed        = false;
 
@@ -74,27 +77,29 @@
 		// Load the image
 		this.imgTexture = new Image();
 		this.imgTexture.onload = function(){
+			if ( this.destroyed )
+				return;
 			requestAnimationFrame(this.render);
-	        this._setEventListeners();
+			this._setEventListeners();
 		}.bind(this);
 		this.imgTexture.src = options.path;
 
-    };
+	};
 
-    PinchZoomCanvas.prototype = {
+	PinchZoomCanvas.prototype = {
 
 		// Render method. It starts in infinite loop in each requestAnimationFrame of the browser.
 		render: function() {
 			if ( this.init && !this.running )
 				return this;
 
-            //set scale such as image cover all the canvas
-            if( !this.init ) {
+			//set scale such as image cover all the canvas
+			if( !this.init ) {
 				if ( this.imgTexture.width ) {
 
 					var viewportRatio = this.canvas.width / this.canvas.height;
 					var imageRatio    = this.imgTexture.width / this.imgTexture.height;
-				    var scaleRatio    = null;
+					var scaleRatio    = null;
 
 					if (imageRatio >= viewportRatio) {
 						this.initResizeProperty = 'width';
@@ -109,31 +114,31 @@
 						this.position.y = 0;
 					}
 
-                    this.scale.x = scaleRatio;
-                    this.scale.y = scaleRatio;
+					this.scale.x = scaleRatio;
+					this.scale.y = scaleRatio;
 
 					this.initPosition = {
 						x: this.position.x,
 						y: this.position.y
 					};
 					this.initialScale = scaleRatio;
-                    this.init         = true;
+					this.init         = true;
 
 					this.calculateOffset();
 
-                }
-            }
+				}
+			}
 
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-            this.context.drawImage(
-                this.imgTexture,
-                this.position.x, this.position.y,
-                this.scale.x * this.imgTexture.width,
-                this.scale.y * this.imgTexture.height);
+			this.context.drawImage(
+				this.imgTexture,
+				this.position.x, this.position.y,
+				this.scale.x * this.imgTexture.width,
+				this.scale.y * this.imgTexture.height);
 
 			requestAnimationFrame(this.render);
-        },
+		},
 
 		pause: function () {
 			this.running = false;
@@ -155,13 +160,13 @@
 			return this;
 		},
 
-        zoom: function(zoom, touchX, touchY) {
-            if(!zoom) return;
+		zoom: function(zoom, touchX, touchY) {
+			if(!zoom) return;
 
-            //new scale
-            var currentScale = this.scale.x;
-            var newScale     = this.scale.x + zoom/100;
-            if( newScale < this.initialScale ) {
+			//new scale
+			var currentScale = this.scale.x;
+			var newScale     = this.scale.x + zoom/100;
+			if( newScale < this.initialScale ) {
 					this.zoomed = false;
 					this.position.x = this.initPosition.x;
 					this.position.y = this.initPosition.y;
@@ -169,16 +174,16 @@
 					this.scale.y = this.initialScale;
 					return;
 			};
-            if (this.maxZoom && newScale > this.maxZoom){
-                // could just return but then won't stop exactly at maxZoom
-                newScale = this.maxZoom;
-            }
+			if (this.maxZoom && newScale > this.maxZoom){
+				// could just return but then won't stop exactly at maxZoom
+				newScale = this.maxZoom;
+			}
 
 			var deltaScale    = newScale - currentScale;
 			var currentWidth  = (this.imgTexture.width * this.scale.x);
-            var currentHeight = (this.imgTexture.height * this.scale.y);
+			var currentHeight = (this.imgTexture.height * this.scale.y);
 			var deltaWidth    = this.imgTexture.width * deltaScale;
-            var deltaHeight   = this.imgTexture.height * deltaScale;
+			var deltaHeight   = this.imgTexture.height * deltaScale;
 
 			var tX = ( touchX * 2 - this.position.x );
 			var tY = ( touchY * 2 - this.position.y );
@@ -186,20 +191,20 @@
 			var pY = -tY / currentHeight;
 
 
-            //finally affectations
-            this.scale.x    = newScale;
-            this.scale.y    = newScale;
-            this.position.x += pX * deltaWidth;
-            this.position.y += pY * deltaHeight;
+			//finally affectations
+			this.scale.x    = newScale;
+			this.scale.y    = newScale;
+			this.position.x += pX * deltaWidth;
+			this.position.y += pY * deltaHeight;
 
 			this.zoomed = true;
 
 			// zoom scale callback
-            if (this.onZoom){
-                this.onZoom(newScale, this.zoomed);
-            }
+			if (this.onZoom){
+				this.onZoom(newScale, this.zoomed);
+			}
 
-        },
+		},
 
 		move: function(relativeX, relativeY) {
 
@@ -267,6 +272,13 @@
 		},
 
 		destroy: function () {
+			this.destroyed = true;
+
+			cache.push(this.imgTexture);
+			this.imgTexture.src = this.emptyImage;
+			if (timeout) clearTimeout(timeout);
+			timeout = setTimeout(function(){ cache = [] }, 60000);
+
 			this.pause();
 			this._removeEventListeners();
 			this._destroyImpetus();
@@ -279,52 +291,52 @@
 		//
 
 		_gesturePinchZoom: function(event) {
-            var zoom = false;
+			var zoom = false;
 
-            if( event.targetTouches.length >= 2 ) {
-                var p1 = event.targetTouches[0];
-                var p2 = event.targetTouches[1];
-                var zoomScale = Math.sqrt(Math.pow(p2.pageX - p1.pageX, 2) + Math.pow(p2.pageY - p1.pageY, 2)); // euclidian distance
+			if( event.targetTouches.length >= 2 ) {
+				var p1 = event.targetTouches[0];
+				var p2 = event.targetTouches[1];
+				var zoomScale = Math.sqrt(Math.pow(p2.pageX - p1.pageX, 2) + Math.pow(p2.pageY - p1.pageY, 2)); // euclidian distance
 
-                if( this.lastZoomScale ) {
-                    zoom = zoomScale - this.lastZoomScale;
-                }
+				if( this.lastZoomScale ) {
+					zoom = zoomScale - this.lastZoomScale;
+				}
 
-                this.lastZoomScale = zoomScale;
-            }
-            return zoom;
-        },
+				this.lastZoomScale = zoomScale;
+			}
+			return zoom;
+		},
 
 		_checkRequestAnimationFrame: function() {
 			if ( window.requestAnimationFrame )
 				return this;
 
 			var lastTime = 0;
-            var vendors  = ['ms', 'moz', 'webkit', 'o'];
-            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-                window.cancelAnimationFrame =
-                  window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
-            }
+			var vendors  = ['ms', 'moz', 'webkit', 'o'];
+			for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+				window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+				window.cancelAnimationFrame =
+				  window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+			}
 
-            if (!window.requestAnimationFrame) {
-                window.requestAnimationFrame = function(callback, element) {
-                    var currTime = new Date().getTime();
-                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-                      timeToCall);
-                    lastTime = currTime + timeToCall;
-                    return id;
-                };
-            }
+			if (!window.requestAnimationFrame) {
+				window.requestAnimationFrame = function(callback, element) {
+					var currTime = new Date().getTime();
+					var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+					var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+					  timeToCall);
+					lastTime = currTime + timeToCall;
+					return id;
+				};
+			}
 
-            if (!window.cancelAnimationFrame) {
-                window.cancelAnimationFrame = function(id) {
-                    clearTimeout(id);
-                };
-            }
+			if (!window.cancelAnimationFrame) {
+				window.cancelAnimationFrame = function(id) {
+					clearTimeout(id);
+				};
+			}
 			return this;
-        },
+		},
 
 
 		_createImpetus: function () {
@@ -373,15 +385,19 @@
 
 
 		_setEventListeners: function() {
-            this.canvas.addEventListener('touchstart', this.onTouchStart );
-            this.canvas.addEventListener('touchmove', this.onTouchMove );
+			if ( !this.canvas )
+				return this;
+			this.canvas.addEventListener('touchstart', this.onTouchStart );
+			this.canvas.addEventListener('touchmove', this.onTouchMove );
 			this.canvas.addEventListener('touchend', this.onTouchEnd );
 			return this;
-        },
+		},
 
 		_removeEventListeners: function () {
+			if ( !this.canvas )
+				return this;
 			this.canvas.removeEventListener('touchstart', this.onTouchStart );
-            this.canvas.removeEventListener('touchmove', this.onTouchMove );
+			this.canvas.removeEventListener('touchmove', this.onTouchMove );
 			this.canvas.removeEventListener('touchend', this.onTouchEnd );
 			return this;
 		},
@@ -461,8 +477,8 @@
 			this.startZoom = false;
 
 		}
-    }
+	}
 
-    return PinchZoomCanvas;
+	return PinchZoomCanvas;
 
 }));
