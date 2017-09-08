@@ -32,11 +32,19 @@
 		this.canvas.style.height  = clientHeight+'px';
 		this.context              = this.canvas.getContext('2d');
 		this.maxZoom              = (options.maxZoom || 2)*2;
-		this.onZoomEnd            = options.onZoomEnd; // Callback of zoom end
-		this.onZoom               = options.onZoom; // Callback on zoom
 		this.initResizeProperty   = null;
 		this.threshold            = options.threshold || 40;
 		this.emptyImage           = options.emptyImage || 'empty.gif';
+
+		// Hooks
+		this.onZoomEnd            = options.onZoomEnd; // Callback of zoom end
+		this.onZoom               = options.onZoom; // Callback on zoom
+		this.onReady              = function(){
+			if ( options.onReady ){
+				options.onReady();
+			}
+			this.onReady = null;
+		};
 
 		// Init
 		this.position = {
@@ -69,6 +77,7 @@
 		this.zoomed        = false;
 
 		// Bind events
+		this.onReady      = this.onReady.bind(this);
 		this.onTouchStart = this.onTouchStart.bind(this);
 		this.onTouchMove  = this.onTouchMove.bind(this);
 		this.onTouchEnd   = this.onTouchEnd.bind(this);
@@ -93,8 +102,11 @@
 			if ( this.init && !this.running )
 				return this;
 
+			var init = this.init;
+			var firstDrawImage = false;
+
 			//set scale such as image cover all the canvas
-			if( !this.init ) {
+			if( !init ) {
 				if ( this.imgTexture.width ) {
 
 					var viewportRatio = this.canvas.width / this.canvas.height;
@@ -123,6 +135,7 @@
 					};
 					this.initialScale = scaleRatio;
 					this.init         = true;
+					firstDrawImage    = true;
 
 					this.calculateOffset();
 
@@ -136,6 +149,9 @@
 				this.position.x, this.position.y,
 				this.scale.x * this.imgTexture.width,
 				this.scale.y * this.imgTexture.height);
+
+			if ( firstDrawImage )
+				this.onReady();
 
 			requestAnimationFrame(this.render);
 		},
