@@ -438,8 +438,8 @@
 				if ( this.momentum  )
 					this._destroyImpetus();
 
-				var x = ( e.targetTouches[0].pageX + e.targetTouches[1].pageX ) / 2;
-				var y = ( e.targetTouches[0].pageY + e.targetTouches[1].pageY ) / 2;
+				var x = ( e.targetTouches[0].pageX + e.targetTouches[1].pageX ) / 2 - this.offeset.x;
+				var y = ( e.targetTouches[0].pageY + e.targetTouches[1].pageY ) / 2 - this.offeset.y;
 				this.zoom( this._gesturePinchZoom(e), x, y );
 			}
 			else if(e.targetTouches.length == 1) {
