@@ -1,6 +1,6 @@
 {
   "name": "pinch-zoom-canvas",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Pinch zoom to images based on canvas",
   "main": "pinch-zoom-canvas.js",
   "scripts": {
