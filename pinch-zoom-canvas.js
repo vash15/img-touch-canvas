@@ -456,11 +456,11 @@
 			// Check if touchend
 			if ( this.doubletap && !this.startZoom && e.changedTouches.length > 0 ){
 				var touch     = e.changedTouches[0]
-				var distance  = touch.pageX - (this.lastTouchPageX || 0);
+				var distance  = Math.abs(touch.pageX - (this.lastTouchPageX || 0));
 				var now       = new Date().getTime();
 				var lastTouch = this.lastTouchTime || now + 1 /** the first time this will make delta a negative number */;
 				var delta     = now - lastTouch;
-				if ( distance >= 0 && distance < this.threshold && delta > 0 && delta < 500 ){
+				if ( distance < this.threshold && delta > 0 && delta < 500 ){
 					this.lastTouchTime  = null;
 					this.lastTouchPageX = 0;
 					this.startZoom      = true;
