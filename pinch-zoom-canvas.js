@@ -13,8 +13,8 @@
 	var timeout;
 	var cache = [];
 	var PinchZoomCanvas = function(options) {
-		if( !options || !options.canvas || !options.path) {
-			throw 'PinchZoomCanvas constructor: missing arguments canvas or path';
+		if( !options || !options.canvas || !(options.path || options.canvasimg)) {
+			throw 'PinchZoomCanvas constructor: missing arguments canvas or one of path or canvasimg';
 		}
 
 		// Check if exists function requestAnimationFrame
@@ -83,16 +83,22 @@
 		this.onTouchEnd   = this.onTouchEnd.bind(this);
 		this.render       = this.render.bind(this);
 
-		// Load the image
-		this.imgTexture = new Image();
-		this.imgTexture.onload = function(){
-			if ( this.destroyed )
-				return;
+		if (options.path) {
+			// Load the image
+			this.imgTexture = new Image();
+			this.imgTexture.onload = function(){
+				if ( this.destroyed )
+					return;
+				requestAnimationFrame(this.render);
+				this._setEventListeners();
+			}.bind(this);
+			this.imgTexture.src = options.path;
+		} else {
+			// Image is preloaded in canvasimg
+			this.imgTexture = options.canvasimg;
 			requestAnimationFrame(this.render);
 			this._setEventListeners();
-		}.bind(this);
-		this.imgTexture.src = options.path;
-
+		}
 	};
 
 	PinchZoomCanvas.prototype = {
