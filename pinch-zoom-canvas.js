@@ -308,6 +308,14 @@
 			this.canvas = null;
 		},
 
+		clearCache: function() {
+			if (timeout) {
+				clearTimeout(timeout);
+				timeout = undefined;
+			}
+			cache = [];
+		},
+
 		//
 		// Private
 		//
