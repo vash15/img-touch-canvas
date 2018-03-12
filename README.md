@@ -51,7 +51,8 @@ $ npm install --save pinch-zoom-canvas
 ## Options
 
 - `canvas` mandatory. It is a DOM element where the image is rendered.
-- `path` mandatory. It is a path url of image.
+- `path` one of path or canvasimg is mandatory. It is a path url of image.
+- `canvasimg` one of path or canvasimg is mandatory. Canvas object with preloaded image.
 - `doubletap` optional (default `true`). Double tap for zooming.
 - `momentum` optional (defalut `false`). Set a momentum when the image is dragged. This parameter require [Impetus](https://github.com/SonoIo/impetus) library.
 - `maxZoom` optional (default `2`). It is the zoom max.
@@ -98,6 +99,40 @@ var pinchZoom = new PinchZoomCanvas({
 		console.log("---> zoom is %s", zoom);
 	}
 	});
+```
+
+## Usage with canvasimg
+
+```html
+<script src="https://raw.githubusercontent.com/blueimp/JavaScript-Load-Image/master/js/load-image.all.min.js"></script>
+<canvas id="mycanvas" style="width: 100%; height: 100%"></canvas>
+```
+
+```js
+var pinchZoom;
+loadImage(
+		'your image url',
+		function(canvasimg) {
+			var pinchZoom = new PinchZoomCanvas({
+				canvas: document.getElementById('mycanvas'),
+				canvasimg: canvasimg,
+				momentum: true,
+				zoomMax: 2,
+				doubletap: true,
+				onZoomEnd: function (zoom, zoomed) {
+					console.log("---> is zoomed: %s", zoomed);
+					console.log("---> zoom end at %s", zoom);
+				},
+				onZoom: function (zoom) {
+					console.log("---> zoom is %s", zoom);
+				}
+				});
+		},
+		{
+			orientation: true,
+			canvas: true
+		}
+);
 ```
 
 ## Licence
